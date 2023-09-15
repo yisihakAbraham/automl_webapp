@@ -1,29 +1,62 @@
-{% extends "base.html" %}
-{% block title %}login{% endblock %}
-{% block content %}
-<form method="POST">
-  <h3 align="center">Login</h3>
-  <div class="form-group">
-    <label for="email">Email Address</label>
-    <input
-      type="email"
-      class="form-control"
-      id="email"
-      name="email"
-      placeholder="Enter email"
-    />
-  </div>
-  <div class="form-group">
-    <label for="password">Password</label>
-    <input
-      type="password"
-      class="form-control"
-      id="password"
-      name="password"
-      placeholder="Enter password"
-    />
-  </div>
-  <br />
-  <button type="submit" class="btn btn-primary">Login</button>
-</form>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="{{ url_for('static', filename='staticForHome/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='staticForHome/css/all.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='staticForHome/css/signupStyle.css')}}">
+</head>
+<body class="bg-light">
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            {% if category == 'error' %}
+                                <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+
+                                    </button>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                                    </button>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+        <h1 class="mt-3 mb-5 text-center"><span class="text-primary">Model</span> Maker</h1>
+        <div class="row mt-5">
+            <div class="col-lg-5 bg-white m-auto rounded-top wrapperSignup ">
+                <h2 class="text-center pt-3 mb-5">Login</h2>
+                <!-- form start -->
+
+                <form method="post">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                        <input type="email" name="email" id="email" class="form-control" placeholder="Email">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                        <input type="password" name="password" id="password" class="form-control" placeholder="password">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                    <p class="text-center mt-3">
+                        Create an account! <a href="/sign-up">Signup here</a>
+                    </p>
+                </form>
+
+                <!-- form start -->
+            </div>
+        </div>
+    </div>
+     <script src="{{ url_for('static', filename='staticForHome/js/bootstrap.bundle.min.js')}}"></script>
+</body>
+</html>

@@ -1,5 +1,1055 @@
-{% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
-{% block content %}
-<h1>Dashboard</h1>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <link rel="stylesheet" href="{{ url_for('static', filename='staticForDash/css/bootstrap.min.css')}}" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='staticForDash/css/dataTables.bootstrap5.min.css')}}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='staticForDash/css/style.css')}}" />
+    <title>dashboard</title>
+  </head>
+  <body>
+    <!-- top navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
+      <div class="container-fluid">
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="offcanvas"
+          data-bs-target="#sidebar"
+          aria-controls="offcanvasExample"
+        >
+          <span class="navbar-toggler-icon" data-bs-target="#sidebar"></span>
+        </button>
+        <a
+          class="navbar-brand me-auto ms-lg-0 ms-3 text-uppercase fw-bold"
+          href="#"
+          >Model Maker</a
+        >
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#topNavBar"
+          aria-controls="topNavBar"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="topNavBar">
+          <form class="d-flex ms-auto my-3 my-lg-0">
+          </form>
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle ms-2"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="bi bi-person-fill"></i>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                 {% if user.is_authenticated %}
+                <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                {% endif %}
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- top navigation bar -->
+    <!-- offcanvas -->
+    <div
+      class="offcanvas offcanvas-start sidebar-nav bg-dark"
+      tabindex="-1"
+      id="sidebar"
+    >
+      <div class="offcanvas-body p-0">
+        <nav class="navbar-dark">
+          <ul class="navbar-nav">
+            <li>
+              <div class="text-muted small fw-bold text-uppercase px-3 mt-3">
+                CORE
+              </div>
+            </li>
+            <li>
+              <a href="#" class="nav-link px-3 ">
+                <span class="me-2"><i class="bi bi-speedometer2"></i></span>
+                <span>Dashboard</span>
+              </a>
+            </li>
+            <li class="my-4"><hr class="dropdown-divider bg-light" /></li>
+            <li>
+              <div class="text-muted small fw-bold text-uppercase px-3 mb-3">
+                Interface
+              </div>
+            </li>
+
+            <li>
+              <a href="#" class="nav-link px-3" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                <span class="me-2"><i class="bi bi-play"></i></span>
+                <span>Train</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="nav-link px-3" >
+                <span class="me-2"><i class="bi bi-table"></i></span>
+                <span>Dataset</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="nav-link px-3">
+                <span class="me-2"><i class="bi bi-graph-up"></i></span>
+                <span>Model</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="nav-link px-3">
+                <span class="me-2"><i class="bi bi-wrench"></i></span>
+                <span>Settings</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Train modal -->
+     <!--  upload data modal  -->
+    <div class="modal mt-5" id="uploadModal" tabindex="-1" aria-labelledby="modal-title" aria-hidden="true">
+      <div class="modal-dialog modal-lg  modal-dialog-scrollable" >
+        <div class="modal-content">
+          <div class="modal-header bg bg-primary pb-0 border-bottom-0">
+            <ul class="nav nav-tabs card-header-tabs">
+              <li class="nav-item">
+                <i class="nav-link active" >Upload</i>
+              </li>
+              <li class="nav-item">
+                <i class="nav-link disabled text-white mb-2" >Select Model</i>
+              </li>
+              <li class="nav-item">
+                <i class="nav-link text-white disabled" >Train</i>
+              </li>
+            </ul>
+            <button type="button" class="btn-close mb-2 btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body recentcontainer p-0">
+            <div class="row gx-0">
+              <div class="col bg-white">
+                <h3 class="m-3 mt-4">Requirement</h3>
+                <div class="requirmentlist m-4 mt-0" style="margin-left: 5px;">
+                  <i class="bi bi-check"> Dataset must be in CSV format</i><br>
+                  <i class="bi bi-check"> There should no be an empty cell</i><br>
+                  <i class="bi bi-check"> Any data preprocessing should be done first</i><br>
+                  <i class="bi bi-check"> First row should be column name</i><br>
+                  <i class="bi bi-check"> File should be less than 25MB</i><br>
+
+                </div>
+
+              </div>
+              <div class="col-8 mt-5">
+                <form method="post" id="datasetForm" enctype="multipart/form-data">
+                  <div class="form-group text-center align-middle">
+                    <i class="bi bi-cloud-upload" style="font-size: 50px;"></i><br>
+                    <label for="dataUploadInput">Upload Dataset</label><br>
+                    <input type="file" name="dataset" class="form-control-file mt-3 mb-4" id="dataUploadInput" style="margin-left: 90px" accept=".csv"><br>
+                    <label for="datasetName" class="form-label">Name of Dataset:</label>
+                    <input type="text" class="form-control-sm mb-5" name="datasetName" id="datasetName" required><br>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer mt-0">
+            <button type="button" class="btn btn-primary" data-bs-target="#selectModal" data-bs-toggle="modal" data-bs-dismiss="modal"  id="uploadDataButton" disabled>Upload</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- select model modal  -->
+    <div class="modal mt-5" id="selectModal" tabindex="-1" aria-labelledby="select-modal" aria-hidden="true">
+      <div class="modal-dialog modal-lg  modal-dialog-scrollable" >
+        <div class="modal-content">
+          <div class="modal-header bg bg-primary pb-0 border-bottom-0">
+            <ul class="nav nav-tabs card-header-tabs">
+              <li class="nav-item">
+                <i class="nav-link text-white disabled" >Upload</i>
+              </li>
+              <li class="nav-item">
+                <i class="nav-link active mb-2" >Select Model</i>
+              </li>
+              <li class="nav-item">
+                <i class="nav-link text-white disabled" >Train</i>
+              </li>
+            </ul>
+            <button type="button" class="btn-close mb-2 btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body recentcontainer p-0">
+            <div class="row gx-0">
+              <div class="col bg-white">
+                <h4 class="m-3 mt-4 border-bottom pb-2">ML algorithms</h4>
+                <div class="mlModelSelect">
+
+                  <!-- classification ------------------------------->
+                  <div class="classification" id="classification">
+                    <select class="form-select-sm m-3 mt-0 mb-0 modelSelect" aria-label="ml algorithms" id="modelSelectC">
+                      <option value="logistic">Logistic Regression</option>
+                      <option value="knn" >KNN</option>
+                      <option value="svm" >Support Vector Machine</option>
+                    </select>
+                    <h4 class="m-3 border-bottom pb-2">Hyperparameters</h4>
+                    <div class="content">
+                      <form action="#">
+
+
+
+                        <div class="hp-logistic hparameter" id="logistic">
+                          <label for="trainTest">Train/Test:</label>
+                          <select class="form-select-sm mt-0 mb-2 " aria-label="ml algorithms" id="trainTest">
+                            <option value="1" selected>80/20</option>
+                            <option value="1" >70/30</option>
+                            <option value="1" >60/40</option>
+                            <option value="1" >50/50</option>
+                          </select><br>
+                          <label for="trainTest">Penalty:</label>
+                          <select class="form-select-sm mt-0 mb-2 " aria-label="ml algorithms" id="trainTest">
+                            <option value="1" selected>L1</option>
+                            <option value="1" >L2</option>
+                            <option value="1" >elasticnet</option>
+                            <option value="1" >none</option>
+                          </select><br>
+                          <label for="n-neighbor" class="form-label">C:</label>
+                          <input type="number" class="form-control-sm mb-2" name="alpha-regression" id="n-neighbor" value="5" style="width: 90px;"><br>
+                          <label for="alpha" class="form-label">max_iter:</label>
+                          <input type="number" class="form-control-sm mb-2" name="alpha-regression" id="n-neighbor" value="100" style="width: 90px;"><br>
+                        </div>
+
+
+                        <div class="hp-KNN hparameter" id="knn">
+                          <label for="trainTest">Train/Test:</label>
+                          <select class="form-select-sm mt-0 mb-2 " aria-label="ml algorithms" id="trainTest">
+                            <option value="1" selected>80/20</option>
+                            <option value="1" >70/30</option>
+                            <option value="1" >60/40</option>
+                            <option value="1" >50/50</option>
+                          </select><br>
+                          <label for="alpha" class="form-label">n_neighbors:</label>
+                          <input type="number" class="form-control-sm mb-2" name="alpha-regression" id="alpha" value="5" style="width: 90px;"><br>
+                          <label for="trainTest">weights:</label>
+                          <select class="form-select-sm mt-0 mb-2 " aria-label="ml algorithms" id="trainTest">
+                            <option value="1" selected>uniform</option>
+                            <option value="1" >distance</option>
+                          </select><br>
+                          <label for="alpha" class="form-label">P:</label>
+                          <input type="number" class="form-control-sm mb-2" name="alpha-regression" id="alpha" value="1" style="width: 90px;"><br>
+                        </div>
+
+
+                        <div class="hp-SVM hparameter" id="svm">
+                          <label for="trainTest">Train/Test:</label>
+                          <select class="form-select-sm mt-0 mb-2 " aria-label="ml algorithms" id="trainTest">
+                            <option value="1" selected>80/20</option>
+                            <option value="1" >70/30</option>
+                            <option value="1" >60/40</option>
+                            <option value="1" >50/50</option>
+                          </select><br>
+                          <label for="alpha" class="form-label">C:</label>
+                          <input type="number" value="1" class="form-control-sm mb-2" name="alpha-regression" id="alpha" style="width: 90px;"><br>
+                          <label for="trainTest">Kernel:</label>
+                          <select class="form-select-sm mt-0 mb-2 " aria-label="ml algorithms" id="trainTest">
+                            <option value="1" selected>rbf</option>
+                            <option value="1" >linear</option>
+                            <option value="1" >poly</option>
+                            <option value="1" >sigmoid</option>
+                          </select><br>
+                        </div>
+
+
+                      </form>
+                    </div>
+                  </div>
+
+                  <!--Regression-------------------------->
+                  <div class="regression" id="regression">
+                    <select class="form-select-sm m-3 mt-0 mb-0 modelSelect" aria-label="ml algorithms" id="modelSelectR">
+
+                      <option value="lreg" >Linear regression</option>
+                    </select>
+                    <h4 class="m-3 border-bottom pb-2">Hyperparameters</h4>
+                    <div class="content">
+                      <form method="post" enctype="multipart/form-data" id="mlForm">
+                        <div class="hparameter" id="lreg">
+                          <label for="trainTest">Train/Test:</label>
+                          <select class="form-select-sm mt-0 mb-2 " aria-label="ml algorithms" id="TTL">
+                            <option value="80" selected>80/20</option>
+                            <option value="70" >70/30</option>
+                            <option value="60" >60/40</option>
+                            <option value="50" >50/50</option>
+                          </select><br>
+                          <label for="norm" class="form-label">Normalize: </label>
+                          <input type="checkbox" name="norm" id="norm"><br>
+                          <label for="fitIntercept" class="form-label">Fit_intercept: </label>
+                          <input type="checkbox" name="fitIntercept" id="fitIntercept" checked>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                  </div>
+
+              </div>
+              <div class="col-8">
+                <form>
+                  <div class="form-group text-center">
+                    <div class="row gx-0 mt-5">
+                      <div class="col-6 p-0 mt-5">
+                        <button id="regBtn" type="button" class="btn btn-outline-danger " onclick="showRegression()"><i class="bi bi-graph-up" style="font-size: 60px;"></i></button><br>
+                        <span>Regression</span>
+                      </div>
+                      <div class="col-6 p-0 mt-5">
+                        <button id="clasBtn" type="button" class="btn btn-outline-primary " onclick="showClassification()"><i class="bi bi-graph-down" style="font-size: 60px;"></i></button active><br>
+                        <span>Classification</span>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+              </div>
+          </div>
+          <div class="modal-footer mt-0">
+            <button type="button" class="btn btn-primary" data-bs-target="#uploadModal" data-bs-toggle="modal" data-bs-dismiss="modal">Back</button>
+            <button type="button" class="btn btn-primary " data-bs-target="#selectY" data-bs-toggle="modal" data-bs-dismiss="modal">next</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--  select value to predict -->
+    <div class="modal mt-5" id="selectY" tabindex="-1" aria-labelledby="modal-title" aria-hidden="true">
+      <div class="modal-dialog modal-lg  modal-dialog-scrollable" >
+        <div class="modal-content">
+          <div class="modal-header bg bg-primary pb-0 border-bottom-0">
+            <ul class="nav nav-tabs card-header-tabs">
+              <li class="nav-item">
+                <i class="nav-link text-white disabled " >Upload</i>
+              </li>
+              <li class="nav-item">
+                <i class="nav-link disabled text-white mb-2" >Select Model</i>
+              </li>
+              <li class="nav-item">
+                <i class="nav-link active" >Train</i>
+              </li>
+            </ul>
+            <button type="button" class="btn-close mb-2 btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body recentcontainer p-0">
+            <div class="row gx-0">
+              <div class="col bg-white pb-5">
+                <h3 class="m-3 mt-4">Requirement</h3>
+                <form>
+                  <label class="m-3 mt-0" for="trainTest">Select predicting column: </label>
+                  <select class="form-select mt-0 mb-2 m-3" aria-label="ml algorithms" id="trainTest" style="width: 200px;">
+                    <option value="80" selected>column1</option>
+                    <option value="70" >column2</option>
+                    <option value="60" >column3</option>
+                    <option value="1" >column4</option>
+                  </select>
+                  <label class="m-3 mt-0" for="trainTest">Select column to be predicted: </label>
+                  <select class="form-select mt-0 mb-2 m-3" aria-label="ml algorithms" id="trainTest" style="width: 200px;">
+                    <option value="80" selected>column1</option>
+                    <option value="70" >column2</option>
+                    <option value="60" >column3</option>
+                    <option value="1" >column4</option>
+                  </select><br>
+                </form>
+
+              </div>
+              <div class="col-8">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <span class="me-2"><i class="bi bi-bar-chart-fill"></i></span>
+                    Area Chart Example
+                  </div>
+                  <div class="card-body">
+                    <canvas class="chart" width="400" height="200"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer mt-0">
+            <button type="submit" class="btn btn-primary" data-bs-target="#select" data-bs-toggle="modal" data-bs-dismiss="modal" id="uploadData">Train</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- End of train  -->
+    <!-- offcanvas -->
+    <main class="mt-5 pt-3">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <h2>Dashboard</h2>
+          </div>
+        </div>
+
+
+
+        <!-- star of recent models -->
+        <div class="row m-2 mb-3  recentcontainer rounded">
+          <h3 class="mt-2">Recent Model</h3>
+          <div class="col-md-3 mb-3">
+            <a href="#" class="text-reset text-decoration-none">
+            <div class="card cardList bg-light h-100 shadow">
+              <h5 class="card-header">Model name</h5>
+              <div class="card-body m-3 mb-0 p-0"><span style="color: green;">Accuracy</span>: 50% <br><span style="color: rgb(0, 81, 255);">Model</span>: regression<br><span style="color: rgb(192, 196, 0);">Predict</span>: gender
+              </div>
+              <i class="text-end bi bi-graph-up p-2 pt-0 pb-0" style="font-size: 50px;"></i>
+            </div>
+          </a>
+          </div>
+
+          <div class="col-md-3 mb-3">
+            <a href="#" class="text-reset text-decoration-none">
+            <div class="card cardList bg-light h-100 shadow">
+              <h5 class="card-header">Model name</h5>
+              <div class="card-body m-3 mb-0 p-0">Accuracy: 50% <br>Model: regression<br>Predict: gender
+              </div>
+              <i class="text-end bi bi-graph-up p-2 pt-0 pb-0" style="font-size: 50px;"></i>
+            </div>
+          </a>
+          </div>
+
+
+        </div>
+        <!--  ENd of Recent Models  -->
+
+        <!--start of Recent Dataset   -->
+        <div class="row m-2 mb-3 recentcontainer rounded">
+          <h3 class="mt-2">Recent Dataset</h3>
+          <div class="col-md-3 mb-3">
+            <a href="#" class="text-reset text-decoration-none">
+            <div class="card cardList bg-light h-100 shadow">
+              <h5 class="card-header">Dataset name</h5>
+              <div class="card-body text-end">
+                <i class="text-end bi bi-table p-2 " style="font-size: 50px;"></i>
+              </div>
+              <div class="card-footer">Size: 500 rows</div>
+            </div>
+            </a>
+          </div>
+          <div class="col-md-3 mb-3">
+            <a href="#" class="text-reset text-decoration-none">
+            <div class="card cardList bg-light h-100 shadow">
+              <h5 class="card-header">Dataset name</h5>
+              <div class="card-body text-end">
+                <i class="text-end bi bi-table p-2 " style="font-size: 50px;"></i>
+              </div>
+              <div class="card-footer">Size: 500 rows</div>
+            </div>
+            </a>
+          </div>
+          <div class="col-md-3 mb-3">
+            <a href="#" class="text-reset text-decoration-none">
+            <div class="card cardList bg-light h-100 shadow">
+              <h5 class="card-header">Dataset name</h5>
+              <div class="card-body text-end">
+                <i class="text-end bi bi-table p-2 " style="font-size: 50px;"></i>
+              </div>
+              <div class="card-footer">Size: 500 rows</div>
+            </div>
+            </a>
+          </div>
+
+          </div>
+        </div>
+        <!--  End of REcent Dataset   -->
+
+        <!--Star of tables   -->
+        <div class="row bg-light">
+          <div class="col-md-12 mb-3">
+            <div class="card">
+              <div class="card-header">
+                <span><i class="bi bi-table me-2"></i></span> Dataset Name
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table
+                    id="example"
+                    class="table table-striped data-table"
+                    style="width: 100%"
+                  >
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Office</th>
+                        <th>Age</th>
+                        <th>Start date</th>
+                        <th>Salary</th>
+
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Tiger Nixon</td>
+                        <td>System Architect</td>
+                        <td>Edinburgh</td>
+                        <td>61</td>
+                        <td>2011/04/25</td>
+                        <td>$320,800</td>
+                      </tr>
+                      <tr>
+                        <td>Garrett Winters</td>
+                        <td>Accountant</td>
+                        <td>Tokyo</td>
+                        <td>63</td>
+                        <td>2011/07/25</td>
+                        <td>$170,750</td>
+                      </tr>
+                      <tr>
+                        <td>Ashton Cox</td>
+                        <td>Junior Technical Author</td>
+                        <td>San Francisco</td>
+                        <td>66</td>
+                        <td>2009/01/12</td>
+                        <td>$86,000</td>
+                      </tr>
+                      <tr>
+                        <td>Cedric Kelly</td>
+                        <td>Senior Javascript Developer</td>
+                        <td>Edinburgh</td>
+                        <td>22</td>
+                        <td>2012/03/29</td>
+                        <td>$433,060</td>
+                      </tr>
+                      <tr>
+                        <td>Airi Satou</td>
+                        <td>Accountant</td>
+                        <td>Tokyo</td>
+                        <td>33</td>
+                        <td>2008/11/28</td>
+                        <td>$162,700</td>
+                      </tr>
+                      <tr>
+                        <td>Brielle Williamson</td>
+                        <td>Integration Specialist</td>
+                        <td>New York</td>
+                        <td>61</td>
+                        <td>2012/12/02</td>
+                        <td>$372,000</td>
+                      </tr>
+                      <tr>
+                        <td>Herrod Chandler</td>
+                        <td>Sales Assistant</td>
+                        <td>San Francisco</td>
+                        <td>59</td>
+                        <td>2012/08/06</td>
+                        <td>$137,500</td>
+                      </tr>
+                      <tr>
+                        <td>Rhona Davidson</td>
+                        <td>Integration Specialist</td>
+                        <td>Tokyo</td>
+                        <td>55</td>
+                        <td>2010/10/14</td>
+                        <td>$327,900</td>
+                      </tr>
+                      <tr>
+                        <td>Colleen Hurst</td>
+                        <td>Javascript Developer</td>
+                        <td>San Francisco</td>
+                        <td>39</td>
+                        <td>2009/09/15</td>
+                        <td>$205,500</td>
+                      </tr>
+                      <tr>
+                        <td>Sonya Frost</td>
+                        <td>Software Engineer</td>
+                        <td>Edinburgh</td>
+                        <td>23</td>
+                        <td>2008/12/13</td>
+                        <td>$103,600</td>
+                      </tr>
+                      <tr>
+                        <td>Jena Gaines</td>
+                        <td>Office Manager</td>
+                        <td>London</td>
+                        <td>30</td>
+                        <td>2008/12/19</td>
+                        <td>$90,560</td>
+                      </tr>
+                      <tr>
+                        <td>Quinn Flynn</td>
+                        <td>Support Lead</td>
+                        <td>Edinburgh</td>
+                        <td>22</td>
+                        <td>2013/03/03</td>
+                        <td>$342,000</td>
+                      </tr>
+                      <tr>
+                        <td>Charde Marshall</td>
+                        <td>Regional Director</td>
+                        <td>San Francisco</td>
+                        <td>36</td>
+                        <td>2008/10/16</td>
+                        <td>$470,600</td>
+                      </tr>
+                      <tr>
+                        <td>Haley Kennedy</td>
+                        <td>Senior Marketing Designer</td>
+                        <td>London</td>
+                        <td>43</td>
+                        <td>2012/12/18</td>
+                        <td>$313,500</td>
+                      </tr>
+                      <tr>
+                        <td>Tatyana Fitzpatrick</td>
+                        <td>Regional Director</td>
+                        <td>London</td>
+                        <td>19</td>
+                        <td>2010/03/17</td>
+                        <td>$385,750</td>
+                      </tr>
+                      <tr>
+                        <td>Michael Silva</td>
+                        <td>Marketing Designer</td>
+                        <td>London</td>
+                        <td>66</td>
+                        <td>2012/11/27</td>
+                        <td>$198,500</td>
+                      </tr>
+                      <tr>
+                        <td>Paul Byrd</td>
+                        <td>Chief Financial Officer (CFO)</td>
+                        <td>New York</td>
+                        <td>64</td>
+                        <td>2010/06/09</td>
+                        <td>$725,000</td>
+                      </tr>
+                      <tr>
+                        <td>Gloria Little</td>
+                        <td>Systems Administrator</td>
+                        <td>New York</td>
+                        <td>59</td>
+                        <td>2009/04/10</td>
+                        <td>$237,500</td>
+                      </tr>
+                      <tr>
+                        <td>Bradley Greer</td>
+                        <td>Software Engineer</td>
+                        <td>London</td>
+                        <td>41</td>
+                        <td>2012/10/13</td>
+                        <td>$132,000</td>
+                      </tr>
+                      <tr>
+                        <td>Dai Rios</td>
+                        <td>Personnel Lead</td>
+                        <td>Edinburgh</td>
+                        <td>35</td>
+                        <td>2012/09/26</td>
+                        <td>$217,500</td>
+                      </tr>
+                      <tr>
+                        <td>Jenette Caldwell</td>
+                        <td>Development Lead</td>
+                        <td>New York</td>
+                        <td>30</td>
+                        <td>2011/09/03</td>
+                        <td>$345,000</td>
+                      </tr>
+                      <tr>
+                        <td>Yuri Berry</td>
+                        <td>Chief Marketing Officer (CMO)</td>
+                        <td>New York</td>
+                        <td>40</td>
+                        <td>2009/06/25</td>
+                        <td>$675,000</td>
+                      </tr>
+                      <tr>
+                        <td>Caesar Vance</td>
+                        <td>Pre-Sales Support</td>
+                        <td>New York</td>
+                        <td>21</td>
+                        <td>2011/12/12</td>
+                        <td>$106,450</td>
+                      </tr>
+                      <tr>
+                        <td>Doris Wilder</td>
+                        <td>Sales Assistant</td>
+                        <td>Sydney</td>
+                        <td>23</td>
+                        <td>2010/09/20</td>
+                        <td>$85,600</td>
+                      </tr>
+                      <tr>
+                        <td>Angelica Ramos</td>
+                        <td>Chief Executive Officer (CEO)</td>
+                        <td>London</td>
+                        <td>47</td>
+                        <td>2009/10/09</td>
+                        <td>$1,200,000</td>
+                      </tr>
+                      <tr>
+                        <td>Gavin Joyce</td>
+                        <td>Developer</td>
+                        <td>Edinburgh</td>
+                        <td>42</td>
+                        <td>2010/12/22</td>
+                        <td>$92,575</td>
+                      </tr>
+                      <tr>
+                        <td>Jennifer Chang</td>
+                        <td>Regional Director</td>
+                        <td>Singapore</td>
+                        <td>28</td>
+                        <td>2010/11/14</td>
+                        <td>$357,650</td>
+                      </tr>
+                      <tr>
+                        <td>Brenden Wagner</td>
+                        <td>Software Engineer</td>
+                        <td>San Francisco</td>
+                        <td>28</td>
+                        <td>2011/06/07</td>
+                        <td>$206,850</td>
+                      </tr>
+                      <tr>
+                        <td>Fiona Green</td>
+                        <td>Chief Operating Officer (COO)</td>
+                        <td>San Francisco</td>
+                        <td>48</td>
+                        <td>2010/03/11</td>
+                        <td>$850,000</td>
+                      </tr>
+                      <tr>
+                        <td>Shou Itou</td>
+                        <td>Regional Marketing</td>
+                        <td>Tokyo</td>
+                        <td>20</td>
+                        <td>2011/08/14</td>
+                        <td>$163,000</td>
+                      </tr>
+                      <tr>
+                        <td>Michelle House</td>
+                        <td>Integration Specialist</td>
+                        <td>Sydney</td>
+                        <td>37</td>
+                        <td>2011/06/02</td>
+                        <td>$95,400</td>
+                      </tr>
+                      <tr>
+                        <td>Suki Burks</td>
+                        <td>Developer</td>
+                        <td>London</td>
+                        <td>53</td>
+                        <td>2009/10/22</td>
+                        <td>$114,500</td>
+                      </tr>
+                      <tr>
+                        <td>Prescott Bartlett</td>
+                        <td>Technical Author</td>
+                        <td>London</td>
+                        <td>27</td>
+                        <td>2011/05/07</td>
+                        <td>$145,000</td>
+                      </tr>
+                      <tr>
+                        <td>Gavin Cortez</td>
+                        <td>Team Leader</td>
+                        <td>San Francisco</td>
+                        <td>22</td>
+                        <td>2008/10/26</td>
+                        <td>$235,500</td>
+                      </tr>
+                      <tr>
+                        <td>Martena Mccray</td>
+                        <td>Post-Sales support</td>
+                        <td>Edinburgh</td>
+                        <td>46</td>
+                        <td>2011/03/09</td>
+                        <td>$324,050</td>
+                      </tr>
+                      <tr>
+                        <td>Unity Butler</td>
+                        <td>Marketing Designer</td>
+                        <td>San Francisco</td>
+                        <td>47</td>
+                        <td>2009/12/09</td>
+                        <td>$85,675</td>
+                      </tr>
+                      <tr>
+                        <td>Howard Hatfield</td>
+                        <td>Office Manager</td>
+                        <td>San Francisco</td>
+                        <td>51</td>
+                        <td>2008/12/16</td>
+                        <td>$164,500</td>
+                      </tr>
+                      <tr>
+                        <td>Hope Fuentes</td>
+                        <td>Secretary</td>
+                        <td>San Francisco</td>
+                        <td>41</td>
+                        <td>2010/02/12</td>
+                        <td>$109,850</td>
+                      </tr>
+                      <tr>
+                        <td>Vivian Harrell</td>
+                        <td>Financial Controller</td>
+                        <td>San Francisco</td>
+                        <td>62</td>
+                        <td>2009/02/14</td>
+                        <td>$452,500</td>
+                      </tr>
+                      <tr>
+                        <td>Timothy Mooney</td>
+                        <td>Office Manager</td>
+                        <td>London</td>
+                        <td>37</td>
+                        <td>2008/12/11</td>
+                        <td>$136,200</td>
+                      </tr>
+                      <tr>
+                        <td>Jackson Bradshaw</td>
+                        <td>Director</td>
+                        <td>New York</td>
+                        <td>65</td>
+                        <td>2008/09/26</td>
+                        <td>$645,750</td>
+                      </tr>
+                      <tr>
+                        <td>Olivia Liang</td>
+                        <td>Support Engineer</td>
+                        <td>Singapore</td>
+                        <td>64</td>
+                        <td>2011/02/03</td>
+                        <td>$234,500</td>
+                      </tr>
+                      <tr>
+                        <td>Bruno Nash</td>
+                        <td>Software Engineer</td>
+                        <td>London</td>
+                        <td>38</td>
+                        <td>2011/05/03</td>
+                        <td>$163,500</td>
+                      </tr>
+                      <tr>
+                        <td>Sakura Yamamoto</td>
+                        <td>Support Engineer</td>
+                        <td>Tokyo</td>
+                        <td>37</td>
+                        <td>2009/08/19</td>
+                        <td>$139,575</td>
+                      </tr>
+                      <tr>
+                        <td>Thor Walton</td>
+                        <td>Developer</td>
+                        <td>New York</td>
+                        <td>61</td>
+                        <td>2013/08/11</td>
+                        <td>$98,540</td>
+                      </tr>
+                      <tr>
+                        <td>Finn Camacho</td>
+                        <td>Support Engineer</td>
+                        <td>San Francisco</td>
+                        <td>47</td>
+                        <td>2009/07/07</td>
+                        <td>$87,500</td>
+                      </tr>
+                      <tr>
+                        <td>Serge Baldwin</td>
+                        <td>Data Coordinator</td>
+                        <td>Singapore</td>
+                        <td>64</td>
+                        <td>2012/04/09</td>
+                        <td>$138,575</td>
+                      </tr>
+                      <tr>
+                        <td>Zenaida Frank</td>
+                        <td>Software Engineer</td>
+                        <td>New York</td>
+                        <td>63</td>
+                        <td>2010/01/04</td>
+                        <td>$125,250</td>
+                      </tr>
+                      <tr>
+                        <td>Zorita Serrano</td>
+                        <td>Software Engineer</td>
+                        <td>San Francisco</td>
+                        <td>56</td>
+                        <td>2012/06/01</td>
+                        <td>$115,000</td>
+                      </tr>
+                      <tr>
+                        <td>Jennifer Acosta</td>
+                        <td>Junior Javascript Developer</td>
+                        <td>Edinburgh</td>
+                        <td>43</td>
+                        <td>2013/02/01</td>
+                        <td>$75,650</td>
+                      </tr>
+                      <tr>
+                        <td>Cara Stevens</td>
+                        <td>Sales Assistant</td>
+                        <td>New York</td>
+                        <td>46</td>
+                        <td>2011/12/06</td>
+                        <td>$145,600</td>
+                      </tr>
+                      <tr>
+                        <td>Hermione Butler</td>
+                        <td>Regional Director</td>
+                        <td>London</td>
+                        <td>47</td>
+                        <td>2011/03/21</td>
+                        <td>$356,250</td>
+                      </tr>
+                      <tr>
+                        <td>Lael Greer</td>
+                        <td>Systems Administrator</td>
+                        <td>London</td>
+                        <td>21</td>
+                        <td>2009/02/27</td>
+                        <td>$103,500</td>
+                      </tr>
+                      <tr>
+                        <td>Jonas Alexander</td>
+                        <td>Developer</td>
+                        <td>San Francisco</td>
+                        <td>30</td>
+                        <td>2010/07/14</td>
+                        <td>$86,500</td>
+                      </tr>
+                      <tr>
+                        <td>Shad Decker</td>
+                        <td>Regional Director</td>
+                        <td>Edinburgh</td>
+                        <td>51</td>
+                        <td>2008/11/13</td>
+                        <td>$183,000</td>
+                      </tr>
+                      <tr>
+                        <td>Michael Bruce</td>
+                        <td>Javascript Developer</td>
+                        <td>Singapore</td>
+                        <td>29</td>
+                        <td>2011/06/27</td>
+                        <td>$183,000</td>
+                      </tr>
+                      <tr>
+                        <td>Donna Snider</td>
+                        <td>Customer Support</td>
+                        <td>New York</td>
+                        <td>27</td>
+                        <td>2011/01/25</td>
+                        <td>$112,000</td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Office</th>
+                        <th>Age</th>
+                        <th>Start date</th>
+                        <th>Salary</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- End of TAbles   -->
+      </div>
+    </main>
+    <script src="{{ url_for('static', filename='staticForDash/js/bootstrap.bundle.min.js')}}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.0.2/dist/chart.min.js"></script>
+    <script src="{{ url_for('static', filename='staticForDash/js/jquery-3.5.1.js')}}"></script>
+    <script src="{{ url_for('static', filename='staticForDash/js/jquery.dataTables.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='staticForDash/js/dataTables.bootstrap5.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='staticForDash/js/script.js')}}"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+      var fileContents = null;
+      var trainText = null;
+      $(document).ready(function(){
+        $(".modelSelect").on('change', function(){
+
+          $(".hparameter").hide();
+          $("#" + $(this).val()).fadeIn(1);
+
+        }).change();
+
+      });
+
+      $('.modelSelect').trigger('change');
+
+      $(document).ready(function() {
+       $('#regBtn').on('click', function() {
+        $('#modelSelectR').trigger('change');
+       });
+     });
+
+     $(document).ready(function() {
+       $('#clasBtn').on('click', function() {
+        $('#modelSelectC').trigger('change');
+       });
+     });
+
+  $(document).ready(function() {
+  $("#dataUploadInput").change(function() {
+    var fileInput = document.getElementById('dataUploadInput');
+    var file = fileInput.files[0];
+
+    if (file) {
+      $("#uploadDataButton").prop("disabled", false);
+      console.log('state changed');
+    } else {
+      $("#uploadDataButton").prop("disabled", true);
+      }
+     });
+  });
+
+      $(document).ready(function() {
+        $("#uploadDataButton").click(function() {
+          var fileInput = document.getElementById('dataUploadInput');
+          var file = fileInput.files[0];
+          var datasetname = $('#datasetName').val();
+          console.log(datasetname);
+          if (file) {
+           var formData = new FormData();
+           formData.append('file', file);
+
+           axios.post('/dashboard', formData) .then(function(response) {
+           console.log('dataset uploded');
+        })
+        .catch(function(error) {
+         console.log('error uploading dataset');
+        });
+    } else {
+      console.log('no dataset');
+    }
+       });
+      });
+
+
+    </script>
+  </body>
+</html>

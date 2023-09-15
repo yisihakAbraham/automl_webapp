@@ -1,49 +1,71 @@
-{% extends "base.html" %}
-{% block title %}signup{% endblock %}
-{% block content %}
-<form method="POST">
-  <h3 align="center">Sign Up</h3>
-  <div class="form-group">
-    <label for="email">Email Address</label>
-    <input
-      type="email"
-      class="form-control"
-      id="email"
-      name="email"
-      placeholder="Enter email"
-    />
-  </div>
-  <div class="form-group">
-    <label for="firstName">First Name</label>
-    <input
-      type="text"
-      class="form-control"
-      id="firstName"
-      name="firstName"
-      placeholder="Enter first name"
-    />
-  </div>
-  <div class="form-group">
-    <label for="password1">Password</label>
-    <input
-      type="password"
-      class="form-control"
-      id="password1"
-      name="password1"
-      placeholder="Enter password"
-    />
-  </div>
-  <div class="form-group">
-    <label for="password2">Password (Confirm)</label>
-    <input
-      type="password"
-      class="form-control"
-      id="password2"
-      name="password2"
-      placeholder="Confirm password"
-    />
-  </div>
-  <br />
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sign up</title>
+    <link href="{{ url_for('static', filename='staticForHome/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='staticForHome/css/all.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='staticForHome/css/signupStyle.css')}}">
+</head>
+<body class="bg-light">
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            {% if category == 'error' %}
+                                <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+
+                                    </button>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                                    </button>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+        <h1 class="mt-3 mb-5 text-center"><span class="text-primary">Model</span> Maker</h1>
+        <div class="row" style="height: 60vh; display: flex; align-items: center;">
+            <div class="col-lg-5 bg-white m-auto rounded-top wrapperSignup ">
+                <h2 class="text-center pt-3">Signup</h2>
+                <p class="text-center text-muted lead mb-4">Join by creating an account</p>
+                <!-- form start -->
+
+                <form method="post">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa fa-user"></i></span>
+                        <input type="text" name="firstName" id="firstName" class="form-control" placeholder="First Name">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                        <input type="email" name="email" class="form-control" placeholder="Email">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                        <input type="password" name="password1" id="password1" class="form-control" placeholder="password">
+                    </div>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fa fa-lock"></i></span>
+                        <input type="password" name="password2" id="password2" class="form-control" placeholder="confirm password">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Signup</button>
+                    </div>
+                    <p class="text-center mt-3">
+                        Already Have an account ? <a href="/login">Login here</a>
+                    </p>
+                </form>
+
+                <!-- form start -->
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='staticForHome/js/bootstrap.bundle.min.js')}}"></script>
+</body>
+</html>

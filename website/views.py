@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request
 from flask_login import login_required, current_user
 
 
@@ -11,7 +11,13 @@ def home():
     return render_template("Home.html", user=current_user)
 
 
-@views.route('/dashboard')
+@views.route('/dashboard', methods=['GET', 'POST'])
 @login_required
 def dashboard():
+    print('before')
+    if request.method == 'POST':
+        print('hello')
+        file = request.files['file']
+        print(file)
+
     return render_template("user_dashboard.html", user=current_user)
